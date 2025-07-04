@@ -1,9 +1,15 @@
 # Dunc 
 A dumb and dirt-simple 'build tool' for rez.
 
+- dunc is not a build system.
+- dunc just copies files.
+
+## Install
+```
+rez pip --install git+https://github.com/rfletchr/dunc.git
+```
+
 ## Usage
-
-
 ```python
 # package.py
 
