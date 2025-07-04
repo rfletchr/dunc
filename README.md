@@ -1,7 +1,8 @@
 # Dunc 
-A dumb and dirt simple 'build tool' for rez.
+A dumb and dirt-simple 'build tool' for rez.
 
 ## Usage
+
 
 ```python
 # package.py
@@ -9,7 +10,7 @@ A dumb and dirt simple 'build tool' for rez.
 name = "test"
 version = "0.0.1"
 
-install_requires = ["dunc"]
+install_requires = ["dunc"] 
 
 build_command = "dunc"
 
