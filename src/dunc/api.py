@@ -107,7 +107,7 @@ def find_files(pattern: str, recursive: bool = True, root: str = None) -> list[s
 
 def install_files(
     files: list[str],
-    install_path: str | None = None,
+    install_path: str = None,
     symlink: bool = False,
     executable: bool = False,
 ):
