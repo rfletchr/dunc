@@ -107,7 +107,7 @@ def find_files(pattern: str, recursive: bool = True, root: str = None) -> list[s
 
 def install_files(
     files: list[str],
-    install_path: str = None,
+    install_path: str | None = None,
     symlink: bool = False,
     executable: bool = False,
 ):
@@ -121,9 +121,6 @@ def install_files(
 
     is_windows = platform.system() == "Windows"
     symlink = symlink and get_is_local() and not is_windows
-
-    if get_is_release() and os.path.exists(install_path):
-        raise DunkError(f"Install path '{install_path}' already exists.")
 
     file_len = max(len(file) for file in files)
 
