@@ -3,6 +3,7 @@ A dumb and dirt-simple 'build tool' for rez.
 
 - dunc is not a build system.
 - dunc just copies files.
+- dunc is covenient for simple tasks like copying python files.
 
 ## Install
 ```
