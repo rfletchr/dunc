@@ -12,7 +12,7 @@ __all__ = [
     "install_files",
     "DunkError",
 ]
-
+import shutil
 import os
 import sys
 import ast
@@ -87,7 +87,9 @@ def get_is_local():
     return os.environ["REZ_BUILD_TYPE"] == "local"
 
 
-def find_files(pattern: str, recursive: bool = True, root: str = None) -> list[str]:
+def find_files(
+    pattern: str, recursive: bool = True, root: str = None
+) -> list[tuple[str, str]]:
     """
     Find files matching the given pattern in the specified root directory.
     If root is None, it defaults to the source path.
@@ -100,13 +102,39 @@ def find_files(pattern: str, recursive: bool = True, root: str = None) -> list[s
         raise DunkError(f"Root directory '{root}' does not exist.")
 
     matches = glob.glob(os.path.join(root, pattern), recursive=recursive)
-    rel_matches = [os.path.relpath(m, root) for m in matches]
+    return [(root, os.path.relpath(match, root)) for match in matches]
 
-    return rel_matches
+
+def _copy_file(src: str, dst: str, executable: bool = False, symlink: bool = False):
+    """
+    Copy a file from src to dst.
+    If executable is True, make the file executable.
+    """
+    if not os.path.exists(os.path.dirname(dst)):
+        os.makedirs(os.path.dirname(dst))
+
+    if platform.system() == "Windows":
+        # symlinks on windows are a mess, don't bother.
+        print(f"[copy] {src} -> {dst}")
+        shutil.copy2(src, dst)
+
+    else:
+        if os.path.exists(dst):
+            os.remove(dst)
+
+        if symlink:
+            print(f"[link] {src} -> {dst}")
+            os.symlink(src, dst)
+        else:
+            print(f"[copy] {src} -> {dst}")
+            shutil.copy2(src, dst)
+
+        if executable:
+            os.chmod(dst, 0o755)
 
 
 def install_files(
-    files: list[str],
+    files: list[tuple[str, str]],
     install_path: str = None,
     symlink: bool = False,
     executable: bool = False,
@@ -117,40 +145,11 @@ def install_files(
     if install_path is None:
         install_path = get_install_path()
 
-    source_path = get_source_path()
+    for source_path, rel in files:
+        src = os.path.join(source_path, rel)
+        dst = os.path.join(install_path, rel)
 
-    is_windows = platform.system() == "Windows"
-    symlink = symlink and get_is_local() and not is_windows
-
-    file_len = max(len(file) for file in files)
-
-    for file in files:
-        if os.path.isabs(file):
-            raise DunkError(f"path must be relative, not absolute: '{file}'")
-
-        source_file = os.path.join(source_path, file)
-        install_file = os.path.join(install_path, file)
-        os.makedirs(os.path.dirname(install_file), exist_ok=True)
-
-        padded_name = file.ljust(file_len + 2, " ")
-
-        if symlink:
-            print(f"- [link] {padded_name} -> {install_file}")
-            try:
-                os.symlink(source_file, install_file)
-            except FileExistsError:
-                os.remove(install_file)
-                os.symlink(source_file, install_file)
-        else:
-            print(f"- [copy] {padded_name} -> {install_file}")
-
-            with open(source_file, "rb") as src, open(install_file, "wb") as dst:
-                dst.write(src.read())
-
-        if executable and not is_windows:
-            existing_bitmask = os.stat(install_file).st_mode
-            mask_with_exec = existing_bitmask | 0o111
-            os.chmod(install_file, mask_with_exec)
+        _copy_file(src, dst, executable=executable, symlink=symlink)
 
 
 class DunkError(Exception):
