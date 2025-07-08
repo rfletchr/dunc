@@ -130,7 +130,8 @@ def _copy_file(src: str, dst: str, executable: bool = False, symlink: bool = Fal
             shutil.copy2(src, dst)
 
         if executable:
-            os.chmod(dst, 0o755)
+            print(f"[+exe] {dst}")
+            os.chmod(dst, os.stat(dst).st_mode | 0o111)
 
 
 def install_files(
