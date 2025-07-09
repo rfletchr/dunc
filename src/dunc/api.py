@@ -98,6 +98,9 @@ def find_files(
     if root is None:
         root = get_source_path()
 
+    if root and not os.path.isabs(root):
+        root = os.path.join(get_source_path(), root)
+
     if not os.path.exists(root):
         raise DunkError(f"Root directory '{root}' does not exist.")
 
@@ -146,6 +149,9 @@ def install_files(
     """
     if install_path is None:
         install_path = get_install_path()
+
+    if install_path and not os.path.isabs(install_path):
+        install_path = os.path.join(get_install_path(), install_path)
 
     for source_path, rel in files:
         src = os.path.join(source_path, rel)
