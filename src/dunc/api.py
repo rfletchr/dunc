@@ -102,7 +102,8 @@ def find_files(
         raise DunkError(f"Root directory '{root}' does not exist.")
 
     matches = glob.glob(os.path.join(root, pattern), recursive=recursive)
-    return [(root, os.path.relpath(match, root)) for match in matches]
+    files_only = [match for match in matches if os.path.isfile(match)]
+    return [(root, os.path.relpath(match, root)) for match in files_only]
 
 
 def _copy_file(src: str, dst: str, executable: bool = False, symlink: bool = False):
