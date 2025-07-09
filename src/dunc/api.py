@@ -215,6 +215,8 @@ def execute():
     if is_install():
         print("Executing install function...")
         install_func = extract_function(project_file, "install")
+        if not install_func:
+            raise DunkError("No install function found in the project file.")
         install_func()
 
 
